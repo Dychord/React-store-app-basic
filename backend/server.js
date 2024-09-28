@@ -18,6 +18,6 @@ app.use('/api/products', productRoutes)
 
 app.listen(process.env.PORT, async ()=>{
     await connectDB()
-    console.log("server connected and running at ", process.env.PORT);
+    console.log("server connected and running at", process.env.PORT);
 })
 
