@@ -11,4 +11,5 @@ router.get('/all-products', allProducts)
 
 router.patch('/update/:id', updateProduct)
 
+
 export default router   
