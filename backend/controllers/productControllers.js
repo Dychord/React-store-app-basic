@@ -3,23 +3,25 @@ import mongoose from 'mongoose'
 
 export const createProduct =  async (req,res)=>{
     const {name, price, image} = req.body;
-
     //fill all the options
     if(!name || !price || !image) return res.status(400).json({success: false, message: 'Please provide all the details of product!'})
-
     //created a product on local
-    const createdProduct = new productModel({
-        name,
-        price,
-        image
-    })
-
+        
     try {
+        const productExists = await productModel.findOne({name})
+        if(productExists){
+            res.json({success: false, message: 'Product already exists, create a new product!'})
+        }
+        const createdProduct = new productModel({
+            name,
+            price,
+            image
+        })
         await createdProduct.save() // saved the created product on mongodb
         return res.status(201).json({success: true, data: createdProduct})
     } catch (error) {
-        console.error("error in creating product", error.message); // if any error occured
-        return res.json({success: false, message: "Server error"})
+            console.error("error in creating product", error.message); // if any error occured
+            return res.json({success: false, message: "Server error"})
     }
 }
 
