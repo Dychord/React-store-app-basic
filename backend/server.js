@@ -14,19 +14,6 @@ app.use(express.json())
 app.use(express.urlencoded({extended: true}))
 
 
-app.get('/',(req,res)=>{
-    res.send("hello world")
-})
-
-app.get('/test',(req,res)=>{
-    res.json([
-        { "name": "Vikram", "age": 22 },
-        { "name": "Nitin", "age": 24 }
-      ]     
-)
-})
-
-
 app.use('/api/products', productRoutes)
 
 
