@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 import axiosInstance from "../utils/axios";
+import { axiosInstanceLocal } from "../utils/axios";
 
 function HomePage() {
   const [products, setProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [loading, setLoading] = useState(true); // Loading state
 
   async function getAllProducts() {
     try {
@@ -14,33 +16,49 @@ function HomePage() {
       setAllProducts(response.data);
     } catch (error) {
       console.log("Error fetching all the products", error.message);
+    } finally {
+      setLoading(false); // Set loading to false after fetching
+    }
+  }
+
+  async function sendItemsToBackend(products) {
+    try {
+      const response = await axiosInstanceLocal.post("/create", products);
+      console.log("Products sent:", response.data);
+    } catch (error) {
+      console.log("Error sending products:", error.message);
     }
   }
 
   useEffect(() => {
-    getAllProducts();
+    const fetchAndSendProducts = async () => {
+      await getAllProducts();
+      await sendItemsToBackend(allProducts); // Consider using a different approach to ensure this works
+    };
+
+    fetchAndSendProducts();
   }, []);
 
-  
- // const deleteFunction = async (id) => {
-  //   try {
-  //     await axiosInstance.delete(`/api/products/delete/${id}`);
-  //     setProducts(products.filter((product) => product.id !== id)); // Use id, not _id
-  //     console.log("Deleted successfully");
-  //   } catch (error) {
-  //     console.log("Error deleting product", error.message);
-  //   }
-  // };
-
+  const deleteFunction = async (id) => {
+    try {
+      await axiosInstance.delete(`/api/products/delete/${id}`);
+      setProducts(products.filter((product) => product.id !== id));
+      console.log("Deleted successfully");
+    } catch (error) {
+      console.log("Error deleting product", error.message);
+    }
+  };
 
   const productFilter = (category) => {
-    setSelectedCategory(category); // Set the selected category
+    setSelectedCategory(category);
     if (category) {
       setProducts(allProducts.filter(item => item.category === category));
     } else {
-      setProducts(allProducts); // Reset to all products if no category is selected
+      setProducts(allProducts);
     }
   };
+
+  if (loading) return <div>Loading...</div>; // Loading indicator
 
   return (
     <>
@@ -100,7 +118,7 @@ function HomePage() {
               <div className="flex justify-between items-center h-fit px-2">
                 <div>
                   <h1>{data.title}</h1>
-                  <h1>${data.price}</h1>
+                  <h1 className="font-semibold">${data.price}</h1>
                 </div>
                 <h1>
                   <MdDeleteOutline

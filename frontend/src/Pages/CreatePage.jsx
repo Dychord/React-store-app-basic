@@ -1,14 +1,14 @@
 import React from 'react'
 import { useForm } from 'react-hook-form';
-import axiosInstance from '../utils/axios'
+import {axiosInstanceLocal} from '../utils/axios'
 
 function CreatePage() {
   const {register, handleSubmit, reset} = useForm()
 
-  const takeData = async (data)=>{
 
+  const takeData = async (details)=>{
     try {
-      const response = await axiosInstance.post('/api/products/create', data)
+      const response = await axiosInstanceLocal.post('/create', [details])
       console.log(response.data);
       reset()
     } catch (error) {
@@ -23,7 +23,9 @@ function CreatePage() {
         <h1 className='text-3xl font-semibold'>Create New Product</h1>
         <div>
           <form className='flex flex-col gap-5 w-[17vw]' action="" onSubmit={handleSubmit(takeData)}>
-            <input className='px-4 py-2 rounded-md outline-none' {...register('name')} type="text" placeholder='product name' />
+            <input className='px-4 py-2 rounded-md outline-none' {...register('title')} type="text" placeholder='product title' />
+            <input className='px-4 py-2 rounded-md outline-none' {...register('description')} type="text" placeholder='description' />
+            <input className='px-4 py-2 rounded-md outline-none' {...register('category')} type="text" placeholder='category' />
             <input className='px-4 py-2 rounded-md outline-none' {...register('price')} type="text" placeholder='price' />
             <input className='px-4 py-2 rounded-md outline-none' {...register('image')} type="text" placeholder='image' />
             <button type="submit" className='px-4 py-2 rounded-md w-1/2 self-center outline-none bg-zinc-700 hover:bg-zinc-600 hover:scale-105'>Submit</button>

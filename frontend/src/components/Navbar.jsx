@@ -10,7 +10,7 @@ function Navbar() {
   const {colorMode, toggleColorMode} = useColorMode()
   return (
     <>
-      <nav className={`{w-full p-8 flex justify-between text-lg`} >
+      <nav className={`{w-full p-8 flex justify-between text-lg `} >
 
         <Link className="flex gap-3 items-center text-2xl" to='/' ><h1>Product Store </h1><MdOutlineLocalGroceryStore /></Link>
         <div className="flex gap-5 items-center ">

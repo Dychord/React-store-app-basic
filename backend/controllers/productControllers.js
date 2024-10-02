@@ -1,29 +1,45 @@
 import productModel from '../models/productModel.js'
 import mongoose from 'mongoose'
 
-export const createProduct =  async (req,res)=>{
-    const {name, price, image} = req.body;
-    //fill all the options
-    if(!name || !price || !image) return res.status(400).json({success: false, message: 'Please provide all the details of product!'})
-    //created a product on local
-        
-    try {
-        const productExists = await productModel.findOne({name})
-        if(productExists){
-            res.json({success: false, message: 'Product already exists, create a new product!'})
-        }
-        const createdProduct = new productModel({
-            name,
-            price,
-            image
-        })
-        await createdProduct.save() // saved the created product on mongodb
-        return res.status(201).json({success: true, data: createdProduct})
-    } catch (error) {
-            console.error("error in creating product", error.message); // if any error occured
-            return res.json({success: false, message: "Server error"})
+export const createProduct = async (req, res) => {
+    const products = req.body; // Now it should be an array
+    const createdProducts = [];
+  
+    if (!Array.isArray(products)) {
+      return res.status(400).json({ success: false, message: 'Invalid input, expecting an array of products' });
     }
-}
+  
+    for (const { title, price, description, category, image } of products) {
+      if (!title || !price || !image || !category) {
+        return res.status(400).json({ success: false, message: 'Please provide all the required details of the product!' });
+      }
+  
+      try {
+        const productExists = await productModel.findOne({ title });
+        if (productExists) {
+          return res.status(409).json({ success: false, message: 'Product already exists!' });
+        }
+  
+        const createdProduct = new productModel({
+          title,
+          price,
+          description,
+          category,
+          image
+        });
+  
+        await createdProduct.save();
+        createdProducts.push(createdProduct);
+      } catch (error) {
+        console.error("Error in creating product:", error.message);
+        return res.status(500).json({ success: false, message: "Server error" });
+      }
+    }
+  
+    return res.status(201).json({ success: true, data: createdProducts });
+  };
+  
+  
 
 
 export const deleteProduct = async (req,res)=>{
