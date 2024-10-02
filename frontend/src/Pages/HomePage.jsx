@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { MdDeleteOutline } from "react-icons/md";
-import axiosInstance from "../utils/axios";
 import { axiosInstanceLocal } from "../utils/axios";
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+
 
 function HomePage() {
   const [products, setProducts] = useState([]);
@@ -11,9 +13,9 @@ function HomePage() {
 
   async function getAllProducts() {
     try {
-      const response = await axiosInstance.get("/products");
-      setProducts(response.data);
-      setAllProducts(response.data);
+      const response = await axiosInstanceLocal.get("/all-products");
+      setProducts(response.data.message); 
+      setAllProducts(response.data.message); 
     } catch (error) {
       console.log("Error fetching all the products", error.message);
     } finally {
@@ -21,29 +23,20 @@ function HomePage() {
     }
   }
 
-  async function sendItemsToBackend(products) {
-    try {
-      const response = await axiosInstanceLocal.post("/create", products);
-      console.log("Products sent:", response.data);
-    } catch (error) {
-      console.log("Error sending products:", error.message);
-    }
-  }
-
   useEffect(() => {
-    const fetchAndSendProducts = async () => {
-      await getAllProducts();
-      await sendItemsToBackend(allProducts); // Consider using a different approach to ensure this works
-    };
+    const timer = setTimeout(() => {
+      getAllProducts(); // Fetch products after a delay
+    }, 2000); // 2000 ms delay
 
-    fetchAndSendProducts();
+    return () => clearTimeout(timer); // Cleanup timeout if the component unmounts
   }, []);
 
   const deleteFunction = async (id) => {
     try {
-      await axiosInstance.delete(`/api/products/delete/${id}`);
-      setProducts(products.filter((product) => product.id !== id));
-      console.log("Deleted successfully");
+      await axiosInstanceLocal.delete(`/delete/${id}`);
+      setProducts(products.filter((product) => product._id !== id)); 
+      setAllProducts(products.filter((product) => product._id !== id)); 
+      // console.log("Deleted successfully");
     } catch (error) {
       console.log("Error deleting product", error.message);
     }
@@ -54,11 +47,15 @@ function HomePage() {
     if (category) {
       setProducts(allProducts.filter(item => item.category === category));
     } else {
-      setProducts(allProducts);
+      getAllProducts();
     }
   };
 
-  if (loading) return <div>Loading...</div>; // Loading indicator
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90vh' }}>
+      <CircularProgress />
+    </Box>
+  );
 
   return (
     <>
@@ -105,7 +102,7 @@ function HomePage() {
         <div className="flex flex-wrap p-10 gap-10 w-full">
           {products.map((data) => (
             <div
-              key={data.id}
+              key={data._id}
               className="w-48 h-80 flex flex-col bg-zinc-800 hover:scale-105 transition cursor-pointer overflow-hidden rounded-lg"
             >
               <div className="h-64 w-full overflow-hidden">
@@ -122,7 +119,7 @@ function HomePage() {
                 </div>
                 <h1>
                   <MdDeleteOutline
-                    onClick={() => deleteFunction(data.id)}
+                    onClick={() => deleteFunction(data._id)}
                     className="text-xl"
                   />
                 </h1>
